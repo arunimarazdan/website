@@ -72,13 +72,13 @@ export async function fetchProjectsFromSheet() {
       // ✅ SMART LINK PATCH: Automatically converts Drive links to professional previews
       let pdfLink = (r.Google_drive_pdf_Link || "").trim();
       if (pdfLink.includes("drive.google.com")) {
-        pdfLink = pdfLink
+        pdfLink = pdfLink.replace(/\s/g, "");
           .replace("/view?usp=sharing", "/preview")
           .replace("/view?usp=drive_link", "/preview")
           .replace(/\/view(\?.*)?$/, "/preview");
       }
 
-      const modelLink = (r["3D_Model_Link"] || "").trim();
+      const modelLink = (r["3D_Model_Link"] || "").trim().replace(/\s/g, "");
 
       // Placeholder for images if not provided in sheet
       const cover = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1600&q=80";
