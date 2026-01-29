@@ -1,38 +1,49 @@
 'use client';
-import { useState } from 'react';
-import { projects, siteInfo } from './data';
+import { useState, useEffect } from 'react';
+import { getProjects, siteInfo } from './data';
 
 export default function Portfolio() {
-  const [selected, setSelected] = useState(null);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    getProjects().then(setProjects);
+  }, []);
 
   return (
-    <main>
-      <header style={{ padding: '40px' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{siteInfo.name}</h1>
-        <p>{siteInfo.role}</p>
+    <main style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+      <header style={{ marginBottom: '100px' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-1px', margin: 0 }}>{siteInfo.name}</h1>
+        <p style={{ opacity: 0.5, fontSize: '1.1rem', marginTop: '10px' }}>{siteInfo.role}</p>
       </header>
 
-      <div className="grid-gallery">
-        {projects.map((p, i) => (
-          <div key={i} className="project-card" onClick={() => setSelected(p)}>
-            <img src={p.mainImage} alt="" />
-            <h3>{p.title}</h3>
-          </div>
-        ))}
+      <div style={{ display: 'grid', gap: '60px' }}>
+        {projects.length > 0 ? projects.map((p, i) => (
+          <article key={i} style={{ borderBottom: '1px solid #eee', paddingBottom: '40px' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '15px' }}>{p.title}</h2>
+            <p style={{ color: '#666', lineHeight: '1.6', marginBottom: '25px' }}>{p.description}</p>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              {p.pdfLink && <a href={p.pdfLink} target="_blank" className="btn">View Portfolio PDF</a>}
+              {p.modelLink && <a href={p.modelLink} target="_blank" className="btn">Open 3D Model</a>}
+            </div>
+          </article>
+        )) : <p>Loading projects from Google Sheets...</p>}
       </div>
 
-      {selected && (
-        <div className="modal-overlay">
-          <button onClick={() => setSelected(null)} style={{ float: 'right', fontSize: '2rem', border: 'none', background: 'none', cursor: 'pointer' }}>×</button>
-          <h1>{selected.title}</h1>
-          <p style={{ maxWidth: '600px' }}>{selected.description}</p>
-          <div style={{ margin: '20px 0' }}>
-            {selected.pdfLink && <a href={selected.pdfLink} target="_blank" className="btn">View PDF Portfolio</a>}
-            {selected.modelLink && <a href={selected.modelLink} target="_blank" className="btn">View 3D Model</a>}
-          </div>
-          {selected.gallery.map((img, i) => <img key={i} src={img} style={{ width: '100%', marginBottom: '20px' }} alt="" />)}
-        </div>
-      )}
+      <style jsx>{`
+        .btn {
+          text-decoration: none;
+          color: white;
+          background: black;
+          padding: 12px 24px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: transform 0.2s;
+        }
+        .btn:hover {
+          transform: translateY(-2px);
+          opacity: 0.8;
+        }
+      `}</style>
     </main>
   );
 }
