@@ -1,184 +1,745 @@
-'use client';
-import { useState } from 'react';
+// app/page.js
+"use client";
 
-export default function Portfolio() {
-  const [activeProject, setActiveProject] = useState(null);
+import { useMemo, useState } from "react";
+import { siteInfo, projects } from "./data";
 
-  const scrollToSection = (id) => {
-    if (activeProject) setActiveProject(null);
-    setTimeout(() => {
-      const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
-  };
-
-  const Navigation = () => (
-    <nav className="nav-bar">
-      <div className="nav-left" onClick={() => scrollToSection('hero')}>ARUNIMA RAZDAN</div>
-      <div className="nav-right">
-        <button onClick={() => scrollToSection('about')}>Arunima (About)</button>
-        <button onClick={() => scrollToSection('work')}>Projects</button>
-        <button onClick={() => scrollToSection('contact')}>Contact</button>
-        <button onClick={() => window.open('/resume.pdf', '_blank')}>Resume</button>
-      </div>
-    </nav>
+export default function Page() {
+  const [activeId, setActiveId] = useState(null);
+  const activeProject = useMemo(
+    () => projects.find((p) => p.id === activeId) || null,
+    [activeId]
   );
 
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // --------- CASE STUDY (deep dive) ----------
   if (activeProject) {
     return (
-      <div className="page-wrapper animate-in">
-        <Navigation />
-        <article className="project-detail">
-          <header className="project-header">
-            <h1 className="serif-xl">Speakeasy Bar</h1>
-            <div className="meta-grid">
-              <div className="meta-item"><span>Year</span>2025</div>
-              <div className="meta-item"><span>Type</span>Bar</div>
-              <div className="meta-item"><span>Area</span>250 sqm</div>
-              <div className="meta-item"><span>Location</span>Sauchiehall Street, Glasgow</div>
-              <div className="meta-item"><span>Client</span>The Glasgow School of Arts</div>
-            </div>
-            <p className="main-intro">This project studies how an interior atmosphere becomes the primary determinant of an individual’s experience. The use of light and shadow makes the space intimate and emotionally engaging. The speakeasy transforms into a setting where entertainment develops silently via discussion, reflection and shared experiences. Through introspection and shared moments, dialogue naturally develops between individuals as well as the place.</p>
-          </header>
+      <div className="caseWrap">
+        <header className="topbar">
+          <button className="backBtn" onClick={() => setActiveId(null)}>
+            ← Back
+          </button>
+          <div className="topbarRight">
+            <span className="chip">{activeProject.category}</span>
+            <span className="chip">{activeProject.type}</span>
+          </div>
+        </header>
 
-          <section className="narrative-stack">
-            <div className="content-block">
-              <h3>Materiality</h3>
-              <p>On the Sauchiehall street, there is a mix of stone and slate construction plus modern infill materials.— Red, blonde or grey sandstone with carved stonework.— Slate roofing— Brick — Cast iron/framework— Timber— Reinforced concrete and steel frame seen in some modern structures.— Glass and metal curtain walling and modern claddding system. These materials can be incorporated in the dining space with dark timbered walls, bronze accents and mirrors where the soft amber candle lighting will reflect and create light illusion and warmth.</p>
-              <div className="image-stack">
-                 <img src="/materiality-1.jpg" alt="Materiality" />
-                 <p className="caption">[Fig 01. Materiality Collage]</p>
+        <section className="caseHeader">
+          <div className="caseTitle">
+            <h1>{activeProject.title}</h1>
+            <p className="caseIntro">{activeProject.caseStudy.intro}</p>
+          </div>
+
+          <div className="meta">
+            <div className="row">
+              <span className="k">Year</span>
+              <span className="v">{activeProject.year}</span>
+            </div>
+            <div className="row">
+              <span className="k">Location</span>
+              <span className="v">{activeProject.location}</span>
+            </div>
+            <div className="row">
+              <span className="k">Type</span>
+              <span className="v">{activeProject.type}</span>
+            </div>
+            <div className="row">
+              <span className="k">Area</span>
+              <span className="v">{activeProject.area}</span>
+            </div>
+            <div className="row">
+              <span className="k">Client</span>
+              <span className="v">{activeProject.client}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="hero">
+          <img src={activeProject.heroImage} alt={`${activeProject.title} hero`} />
+          <div className="cap">01 // Project cover</div>
+        </section>
+
+        <section className="caseBody">
+          {activeProject.caseStudy.sections.map((sec, i) => (
+            <div key={i} className="block">
+              <div className="blockText">
+                <h2>{sec.heading}</h2>
+                <p>{sec.body}</p>
+              </div>
+              <div className="blockImgs">
+                {sec.images.map((im, idx) => (
+                  <figure key={idx} className="fig">
+                    <img src={im.src} alt={im.caption || sec.heading} />
+                    {im.caption ? <figcaption>{im.caption}</figcaption> : null}
+                  </figure>
+                ))}
               </div>
             </div>
-          </section>
-          
-          <button className="back-btn" onClick={() => { setActiveProject(null); window.scrollTo(0,0); }}>CLOSE PROJECT</button>
-        </article>
+          ))}
+
+          <div className="conclusion">
+            <h2>Conclusion</h2>
+            <p>{activeProject.caseStudy.conclusion}</p>
+          </div>
+        </section>
+
+        <footer className="caseFooter">
+          <button
+            className="primary"
+            onClick={() => {
+              setActiveId(null);
+              setTimeout(() => scrollTo("projects"), 60);
+            }}
+          >
+            Back to Projects
+          </button>
+        </footer>
+
+        <style jsx global>{baseStyles}</style>
+        <style jsx>{caseStyles}</style>
       </div>
     );
   }
 
+  // --------- SINGLE PAGE (About/Projects/Contact) ----------
   return (
-    <div className="page-wrapper">
-      <Navigation />
+    <main className="page">
+      <style jsx global>{baseStyles}</style>
 
-      <section id="hero" className="hero-section">
-        <h1 className="serif-xl">Atmosphere, <br/>Intimacy & Space.</h1>
+      <nav className="nav">
+        <div className="brand" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          {siteInfo.name}
+        </div>
+
+        <div className="navLinks">
+          <button onClick={() => scrollTo("about")}>Arunima (About)</button>
+          <button onClick={() => scrollTo("projects")}>Projects</button>
+          <button onClick={() => scrollTo("contact")}>Contact</button>
+          <a href={siteInfo.resumeUrl} target="_blank" rel="noreferrer">
+            Resume
+          </a>
+        </div>
+      </nav>
+
+      <section className="heroTop" id="top">
+        <h1 className="bigName">{siteInfo.name}</h1>
+        <p className="role">{siteInfo.role}</p>
       </section>
 
-      <section id="about" className="section">
-        <h2 className="label">01 / About</h2>
-        <div className="about-grid">
-          <div className="about-text">
-            <p>Arunima Razdan is an architect and interior designer whose work explores the relationship between space, atmosphere, and human experience. Her design approach is rooted in the belief that architecture is not only seen, but felt through light, shadow, material, sound, and movement.</p>
-            <p>With an academic foundation shaped in India and advanced study at the Glasgow School of Art, Arunima’s work reflects a dialogue between structure and sensory perception.</p>
+      <section className="about" id="about">
+        <h2 className="sectionTitle">About</h2>
+        <div className="aboutGrid">
+          <div className="aboutText">
+            {siteInfo.about.map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+
+          <div className="aboutCard">
+            <div className="aboutCardInner">
+              <div className="label">Focus</div>
+              <div className="val">Atmosphere, Light, Shadow, Material, Memory</div>
+
+              <div className="spacer" />
+
+              <div className="label">Approach</div>
+              <div className="val">Research-led, sensory interiors, gradual revelation</div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="work" className="section">
-        <h2 className="label">02 / Selected Works</h2>
-        <div className="work-grid">
-          <div className="project-card" onClick={() => { setActiveProject(true); window.scrollTo(0,0); }}>
-            <div className="card-content">
-               <span className="serif-md">Speakeasy Bar</span>
-               <p>Glasgow // 2025</p>
-            </div>
-            <div className="card-hover">
-              <p>This project is located on Sauchiehall Street, a historic road in Glasgow. The Light, Shadow, and Reflection will be my main tools, utilising dim lighting, layered materials, and mirrors to slowly reveal spaces, encouraging movement and curiosity.</p>
-              <span className="view-cta">EXPLORE NARRATIVE →</span>
-            </div>
-          </div>
+      <section className="projects" id="projects">
+        <h2 className="sectionTitle">Selected Projects</h2>
+
+        <div className="grid">
+          {projects.map((p) => (
+            <article key={p.id} className="card" onClick={() => setActiveId(p.id)}>
+              <img className="thumb" src={p.heroImage} alt={p.title} />
+              <div className="overlay">
+                <div className="overlayInner">
+                  <p className="teaser">{p.teaserSummary}</p>
+                  <div className="line" />
+                  <div className="title">{p.title}</div>
+                  <div className="sub">{p.subtitle}</div>
+                  <div className="cta">View Project →</div>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section id="contact" className="section contact-section">
-        <h2 className="label">03 / Contact</h2>
-        <div className="contact-grid">
-          <div className="contact-left">
-            <h2 className="serif-md">Let's build a <br/>conversation.</h2>
-            <div className="social-links">
-              <a href="mailto:ar.arunimarazdan@gmail.com" className="line-link">ar.arunimarazdan@gmail.com</a>
-              <a href="https://linkedin.com/in/arunimarazdan" target="_blank" className="line-link">LinkedIn Profile</a>
+      <section className="contact" id="contact">
+        <h2 className="sectionTitle">Contact</h2>
+
+        <div className="contactGrid">
+          <div className="contactLeft">
+            <p className="contactLead">
+              For collaborations, studio opportunities, or inquiries, please reach out.
+            </p>
+
+            <div className="contactLinks">
+              <a href={`mailto:${siteInfo.contact.email}`}>{siteInfo.contact.email}</a>
+              <a href={siteInfo.contact.linkedin} target="_blank" rel="noreferrer">
+                LinkedIn
+              </a>
             </div>
           </div>
-          <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
-            <input type="email" placeholder="Your Email Address" required />
-            <textarea placeholder="Write your message here..." rows="4" required></textarea>
-            <button type="submit">SEND MESSAGE</button>
+
+          <form
+            className="contactForm"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const name = form.name.value || "";
+              const email = form.email.value || "";
+              const msg = form.message.value || "";
+              const subject = encodeURIComponent(`Portfolio message from ${name}`.trim());
+              const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${msg}`);
+              window.location.href = `mailto:${siteInfo.contact.email}?subject=${subject}&body=${body}`;
+            }}
+          >
+            <label>
+              Your name
+              <input name="name" placeholder="Name" />
+            </label>
+
+            <label>
+              Your email
+              <input name="email" type="email" placeholder="Email" required />
+            </label>
+
+            <label>
+              Message
+              <textarea name="message" placeholder="Write your message..." rows={6} required />
+            </label>
+
+            <button className="primary" type="submit">
+              Message me
+            </button>
           </form>
         </div>
       </section>
 
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Inter:wght@300;400;500&display=swap');
-        
-        :root { --bg: #fdfaf5; --text: #1a1a1a; --accent: #9a8c73; }
-        html { scroll-behavior: smooth; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; -webkit-font-smoothing: antialiased; }
-        
-        .page-wrapper { padding: 0 6%; max-width: 1600px; margin: 0 auto; }
-        
-        /* Nav */
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; padding: 40px 0; position: sticky; top: 0; background: var(--bg); z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.03); }
-        .nav-left { font-weight: 500; letter-spacing: 2px; cursor: pointer; font-size: 13px; }
-        .nav-right button { background: none; border: none; margin-left: 35px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; opacity: 0.4; transition: 0.3s; }
-        .nav-right button:hover { opacity: 1; color: var(--accent); }
-
-        /* Sections */
-        .section { padding: 140px 0; border-top: 1px solid rgba(0,0,0,0.06); }
-        .label { font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: var(--accent); margin-bottom: 60px; }
-        
-        .hero-section { min-height: 80vh; display: flex; align-items: center; }
-        .serif-xl { font-family: 'Playfair Display', serif; font-size: clamp(3.5rem, 9vw, 8rem); font-weight: 400; line-height: 1.1; margin: 0; letter-spacing: -1px; }
-        .serif-md { font-family: 'Playfair Display', serif; font-size: 3.5rem; line-height: 1.2; margin-bottom: 40px; }
-
-        .about-text { max-width: 850px; }
-        .about-text p { font-size: 1.4rem; line-height: 1.7; margin-bottom: 30px; font-weight: 300; color: #333; }
-
-        /* Work */
-        .work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 50px; }
-        .project-card { height: 600px; background: #f4f0e9; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .card-content { text-align: center; }
-        .card-content p { font-size: 10px; letter-spacing: 3px; opacity: 0.4; margin-top: 15px; text-transform: uppercase; }
-        .card-hover { position: absolute; inset: 0; background: #111; color: white; padding: 60px; display: flex; flex-direction: column; justify-content: center; opacity: 0; transition: 0.5s ease; }
-        .project-card:hover .card-hover { opacity: 1; }
-        .card-hover p { font-size: 1.1rem; line-height: 1.6; font-weight: 300; margin-bottom: 40px; }
-        .view-cta { font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid #fff; padding-bottom: 5px; align-self: flex-start; }
-
-        /* Contact Section */
-        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-        .social-links { display: flex; flex-direction: column; gap: 20px; }
-        .line-link { font-size: 1.2rem; color: var(--text); text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.1); width: fit-content; padding-bottom: 4px; transition: 0.3s; }
-        .line-link:hover { border-color: var(--text); color: var(--accent); }
-
-        .contact-form { display: flex; flex-direction: column; gap: 40px; }
-        .contact-form input, .contact-form textarea { background: none; border: none; border-bottom: 1px solid #ddd; padding: 15px 0; font-family: inherit; font-size: 1rem; outline: none; transition: 0.3s; }
-        .contact-form input:focus, .contact-form textarea:focus { border-color: var(--text); }
-        .contact-form button { background: var(--text); color: white; border: none; padding: 22px; font-size: 10px; letter-spacing: 3px; cursor: pointer; transition: 0.4s; }
-        .contact-form button:hover { background: var(--accent); }
-
-        /* Project Detail */
-        .project-header { margin: 100px 0; max-width: 1000px; }
-        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 40px 0; margin: 60px 0; }
-        .meta-item span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 8px; }
-        .main-intro { font-size: 1.8rem; line-height: 1.5; font-weight: 300; color: #222; }
-        .content-block { margin: 150px 0; max-width: 900px; }
-        .content-block h3 { text-transform: uppercase; font-size: 11px; letter-spacing: 3px; margin-bottom: 40px; color: var(--accent); }
-        .content-block p { font-size: 1.3rem; line-height: 1.8; font-weight: 300; margin-bottom: 60px; }
-        .image-stack img { width: 100%; height: auto; margin-bottom: 20px; }
-        .caption { font-size: 10px; color: #999; text-align: center; letter-spacing: 1px; }
-        .back-btn { background: var(--text); color: white; border: none; padding: 25px 50px; font-size: 10px; letter-spacing: 3px; cursor: pointer; margin-bottom: 100px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeIn 1s ease forwards; }
-
-        @media (max-width: 1024px) {
-          .contact-grid { grid-template-columns: 1fr; gap: 80px; }
-          .serif-xl { font-size: 4rem; }
-          .work-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
-    </div>
+      <footer className="footer">
+        <div>{siteInfo.name}</div>
+        <div className="muted">© {new Date().getFullYear()}</div>
+      </footer>
+    </main>
   );
 }
+
+const baseStyles = `
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap');
+
+:root{
+  --bg: #f6f1ea;
+  --ink: #151515;
+  --muted: rgba(21,21,21,0.60);
+  --hair: rgba(21,21,21,0.10);
+  --card: rgba(255,255,255,0.55);
+}
+
+*{ box-sizing: border-box; }
+html, body{ margin:0; padding:0; background: var(--bg); color: var(--ink); }
+body{ font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+a{ color: inherit; text-decoration: none; }
+button{ font: inherit; }
+
+.page{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 26px 60px;
+}
+
+.nav{
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 18px 0 18px;
+  background: linear-gradient(to bottom, var(--bg) 75%, rgba(246,241,234,0));
+  border-bottom: 1px solid var(--hair);
+}
+
+.brand{
+  letter-spacing: 0.22em;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.navLinks{
+  display:flex;
+  gap: 22px;
+  align-items:center;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.navLinks button{
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.65;
+}
+.navLinks a{
+  opacity: 0.65;
+}
+.navLinks button:hover, .navLinks a:hover{
+  opacity: 1;
+}
+
+.heroTop{
+  padding: 72px 0 34px;
+}
+
+.bigName{
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-size: 3.6rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.role{
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.sectionTitle{
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-size: 1.8rem;
+  margin: 0 0 18px;
+}
+
+.about{ padding: 34px 0 30px; }
+.aboutGrid{
+  display:grid;
+  grid-template-columns: 1.4fr 0.9fr;
+  gap: 34px;
+  align-items: start;
+}
+
+.aboutText p{
+  margin: 0 0 14px;
+  line-height: 1.85;
+  color: rgba(21,21,21,0.82);
+}
+
+.aboutCard{
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.aboutCardInner{
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid rgba(21,21,21,0.08);
+}
+
+.label{
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.val{
+  margin-top: 8px;
+  line-height: 1.7;
+  opacity: 0.85;
+}
+
+.spacer{ height: 18px; }
+
+.projects{ padding: 34px 0 30px; }
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card{
+  position: relative;
+  border-radius: 16px;
+  overflow:hidden;
+  cursor: pointer;
+  border: 1px solid rgba(21,21,21,0.10);
+  background: rgba(0,0,0,0.05);
+  min-height: 520px;
+}
+
+.thumb{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+  transform: scale(1.02);
+  transition: transform 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  background: rgba(15,15,15,0.86);
+  opacity:0;
+  transition: opacity 260ms ease;
+  display:flex;
+  align-items:flex-end;
+  padding: 26px;
+}
+
+.overlayInner{
+  max-width: 420px;
+}
+
+.teaser{
+  margin:0 0 16px;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.88);
+}
+
+.line{
+  width: 56px;
+  height: 1px;
+  background: rgba(255,255,255,0.22);
+  margin: 18px 0;
+}
+
+.title{
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-size: 2rem;
+  color: white;
+}
+
+.sub{
+  margin-top: 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  color: white;
+}
+
+.cta{
+  margin-top: 18px;
+  display:inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: white;
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+  padding-bottom: 6px;
+}
+
+.card:hover .overlay{ opacity:1; }
+.card:hover .thumb{ transform: scale(1.06); }
+
+.contact{ padding: 34px 0 10px; }
+.contactGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  align-items:start;
+}
+
+.contactLead{
+  margin:0 0 16px;
+  color: rgba(21,21,21,0.82);
+  line-height: 1.8;
+}
+
+.contactLinks{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contactLinks a{
+  opacity: 0.75;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.contactLinks a:hover{ opacity: 1; }
+
+.contactForm{
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+  padding: 18px;
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contactForm label{
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactForm input, .contactForm textarea{
+  border-radius: 12px;
+  border: 1px solid rgba(21,21,21,0.12);
+  padding: 12px 12px;
+  background: rgba(255,255,255,0.65);
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.primary{
+  margin-top: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(21,21,21,0.18);
+  background: rgba(21,21,21,0.92);
+  color: white;
+  padding: 12px 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.primary:hover{ background: rgba(21,21,21,1); }
+
+.footer{
+  margin-top: 48px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hair);
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+}
+
+.muted{ opacity: 0.55; }
+
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; }
+  .aboutGrid{ grid-template-columns: 1fr; }
+  .contactGrid{ grid-template-columns: 1fr; }
+  .card{ min-height: 460px; }
+  .bigName{ font-size: 2.8rem; }
+}
+`;
+
+const caseStyles = `
+.caseWrap{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 26px 60px;
+}
+
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  padding: 18px 0;
+  background: linear-gradient(to bottom, var(--bg) 75%, rgba(246,241,234,0));
+  border-bottom: 1px solid var(--hair);
+}
+
+.backBtn{
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0.75;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+.backBtn:hover{ opacity: 1; }
+
+.topbarRight{
+  display:flex;
+  gap: 10px;
+}
+
+.chip{
+  border: 1px solid rgba(21,21,21,0.16);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.caseHeader{
+  display:grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 34px;
+  padding: 34px 0 10px;
+}
+
+.caseTitle h1{
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-size: 3rem;
+  margin: 0 0 12px;
+}
+
+.caseIntro{
+  margin: 0;
+  line-height: 1.9;
+  color: rgba(21,21,21,0.82);
+}
+
+.meta{
+  border: 1px solid rgba(21,21,21,0.10);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.45);
+  padding: 16px;
+  align-self: start;
+}
+
+.row{
+  display:flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(21,21,21,0.06);
+}
+.row:last-child{ border-bottom:none; }
+
+.k{
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.v{
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  opacity: 0.90;
+  text-align: right;
+}
+
+.hero{
+  margin-top: 18px;
+  border-radius: 18px;
+  overflow:hidden;
+  border: 1px solid rgba(21,21,21,0.10);
+  background: rgba(0,0,0,0.04);
+}
+.hero img{
+  width: 100%;
+  display:block;
+  height: auto;
+}
+.cap{
+  padding: 12px 14px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  border-top: 1px solid rgba(21,21,21,0.08);
+  background: rgba(255,255,255,0.45);
+}
+
+.caseBody{
+  padding: 28px 0 10px;
+}
+
+.block{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  padding: 26px 0;
+  border-bottom: 1px solid rgba(21,21,21,0.08);
+}
+
+.blockText h2{
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  margin: 0 0 12px;
+  font-size: 1.8rem;
+}
+.blockText p{
+  margin: 0;
+  line-height: 1.9;
+  color: rgba(21,21,21,0.82);
+}
+
+.blockImgs{
+  display:flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fig{
+  margin: 0;
+  border-radius: 16px;
+  overflow:hidden;
+  border: 1px solid rgba(21,21,21,0.10);
+  background: rgba(0,0,0,0.04);
+}
+.fig img{
+  width: 100%;
+  display:block;
+  height: auto;
+}
+.fig figcaption{
+  padding: 10px 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  border-top: 1px solid rgba(21,21,21,0.08);
+  background: rgba(255,255,255,0.45);
+}
+
+.conclusion{
+  padding: 28px 0 6px;
+}
+.conclusion h2{
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  margin: 0 0 12px;
+}
+.conclusion p{
+  margin: 0;
+  line-height: 1.9;
+  color: rgba(21,21,21,0.82);
+}
+
+.caseFooter{
+  padding: 34px 0 40px;
+  text-align:center;
+}
+
+@media (max-width: 900px){
+  .caseHeader{ grid-template-columns: 1fr; }
+  .block{ grid-template-columns: 1fr; }
+  .caseTitle h1{ font-size: 2.4rem; }
+}
+`;
