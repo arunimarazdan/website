@@ -5,7 +5,8 @@ export const siteInfo = {
 };
 
 // ✅ Your published CSV link (This is your "Dashboard")
-export const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdjFVmR94PmnHqfezpV93TRnbCjxvMp-5PcrNxUBvL_0xp8uqmlINQXOliUklJeKTYQMmQAICtIJrv/pub?output=csv";
+export const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdjFVmR94PmnHqfezpV93TRnbCjxvMp-5PcrNxUBvL_0xp8uqmlINQXOliUklJeKTYQMmQAICtIJrv/pub?output=csv";
 
 // --- Helpers ---
 function splitCsvLine(line) {
@@ -41,7 +42,7 @@ function parseCsv(csvText) {
 
   if (lines.length < 2) return [];
 
-  const headers = splitCsvLine(lines[0]).map((h) => h.replace(/^\uFEFF/, "")); 
+  const headers = splitCsvLine(lines[0]).map((h) => h.replace(/^\uFEFF/, ""));
   const rows = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -70,9 +71,9 @@ export async function fetchProjectsFromSheet() {
       const description = (r.Description || "").trim();
 
       // ✅ SMART LINK PATCH: Automatically converts Drive links to professional previews
-      let pdfLink = (r.Google_drive_pdf_Link || "").trim();
+      let pdfLink = (r.Google_drive_pdf_Link || "").trim().replace(/\s/g, "");
       if (pdfLink.includes("drive.google.com")) {
-        pdfLink = pdfLink.replace(/\s/g, "");
+        pdfLink = pdfLink
           .replace("/view?usp=sharing", "/preview")
           .replace("/view?usp=drive_link", "/preview")
           .replace(/\/view(\?.*)?$/, "/preview");
@@ -81,7 +82,8 @@ export async function fetchProjectsFromSheet() {
       const modelLink = (r["3D_Model_Link"] || "").trim().replace(/\s/g, "");
 
       // Placeholder for images if not provided in sheet
-      const cover = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1600&q=80";
+      const cover =
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1600&q=80";
 
       return {
         title,
